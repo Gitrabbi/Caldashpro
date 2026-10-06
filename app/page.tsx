@@ -1,0 +1,2 @@
+import Link from "next/link";
+export default function Home(){return <main className="landing"><section className="hero"><div className="brandmark">C</div><p className="eyebrow">CALIBRATION MANAGEMENT</p><h1>CalDash<span>Pro</span></h1><p className="lead">Instrument calibration, traceability and compliance in one workspace.</p><div className="actions"><Link className="primary" href="/dashboard">Open workspace</Link><Link className="secondary" href="/login">Sign in</Link></div></section></main>}
