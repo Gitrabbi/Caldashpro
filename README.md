@@ -8,3 +8,6 @@ Calibration management platform for instrument registry, calibration workflow, s
 - Cloudflare Workers deployment via vinext
 
 Copy `.env.example` to `.env.local` for local development. Never commit real environment values.
+
+
+<!-- Cloudflare automatic deployment trigger test: 2026-10-07 -->
