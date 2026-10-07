@@ -13,7 +13,7 @@ export default function Signup() {
     e.preventDefault();
     setMessage("Creating account...");
     const { data,error }=await createClient().auth.signUp({
-      email,password,options:{data:{full_name:name}}
+      email,password,options:{data:{full_name:name},emailRedirectTo:`${window.location.origin}/auth/confirm`}
     });
     if(error){setMessage(error.message);return;}
     if(data.session){location.href="/workspace";return;}
