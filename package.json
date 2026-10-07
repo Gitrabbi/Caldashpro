@@ -1,1 +1,35 @@
-{"name":"caldashpro","version":"0.1.0","private":true,"scripts":{"dev":"next dev","build":"next build","start":"next start","dev:vinext":"vite dev","build:vinext":"vite build","deploy":"npx @vinext/cloudflare deploy"},"dependencies":{"@supabase/ssr":"^0.7.0","@supabase/supabase-js":"^2.57.0","lucide-react":"^0.468.0","next":"^16.0.0","react":"^19.0.0","react-dom":"^19.0.0","react-server-dom-webpack":"^19.3.0"},"devDependencies":{"@cloudflare/vite-plugin":"latest","@types/node":"^22.0.0","@types/react":"^19.0.0","@types/react-dom":"^19.0.0","@vinext/cloudflare":"latest","@vitejs/plugin-rsc":"latest","typescript":"^5.7.0","vinext":"^1.0.1","vite":"latest","wrangler":"latest"}}
+{
+  "name": "caldashpro",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "dev:vinext": "vite dev",
+    "build:vinext": "vite build",
+    "deploy": "npx @vinext/cloudflare deploy"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.7.0",
+    "@supabase/supabase-js": "^2.57.0",
+    "lucide-react": "^0.468.0",
+    "next": "^16.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-server-dom-webpack": "^19.3.0"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "latest",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vinext/cloudflare": "latest",
+    "@vitejs/plugin-rsc": "latest",
+    "typescript": "^5.7.0",
+    "vinext": "^1.0.1",
+    "vite": "latest",
+    "wrangler": "latest"
+  },
+  "type": "module"
+}
