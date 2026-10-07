@@ -29,7 +29,7 @@
     "typescript": "5.9.2",
     "vinext": "1.0.1",
     "vite": "8.3.3",
-    "wrangler": "4.45.0"
+    "wrangler": "4.148.0"
   },
   "type": "module"
 }
