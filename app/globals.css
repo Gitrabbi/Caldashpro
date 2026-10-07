@@ -6,3 +6,24 @@
 .mobileMenu,.navClose{display:none}.navTop{display:flex;align-items:center;justify-content:space-between}aside nav a.active{background:rgba(255,255,255,.1);color:#fff}.settingsGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.inlineForm{display:flex;gap:8px}.inlineForm input{min-width:0;flex:1}.stackForm{display:grid;gap:8px}.stackForm select{padding:10px;border:1px solid var(--line);border-radius:8px;background:#fff}.masterList{margin-top:16px;display:grid}.masterList>div{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}.masterList span{color:var(--muted)}.notice{padding:10px 14px;border:1px solid var(--line);background:#fff;border-radius:9px;margin-bottom:16px}@media(max-width:900px){.settingsGrid{grid-template-columns:1fr}.mobileMenu{display:grid;position:fixed;top:18px;left:18px;z-index:60;width:44px;height:44px;place-items:center;border:0;border-radius:12px;background:#122033;color:#fff;font-size:22px;box-shadow:0 6px 22px #0002}.shell aside{display:flex;position:fixed;left:-290px;top:0;bottom:0;width:270px;z-index:80;transition:left .2s ease}.shell aside.navOpen{left:0}.navClose{display:block;background:transparent;border:0;color:#fff;font-size:30px;padding:0}.navBackdrop{position:fixed;inset:0;z-index:70;border:0;background:#0008}.content{padding-top:84px}}
 
 .calibrationForm{display:grid;gap:16px}.calibrationForm label{display:grid;gap:6px;font-size:13px;font-weight:700}.calibrationForm input,.calibrationForm select,.calibrationForm textarea{padding:11px;border:1px solid var(--line);border-radius:8px;background:#fff;font:inherit}.calibrationForm textarea{min-height:100px;resize:vertical}.calibrationForm .check{display:flex;grid-template-columns:auto 1fr;align-items:center;justify-content:flex-start;gap:8px}.calibrationForm .check input{width:auto}
+
+/* Workspace navigation hardening */
+.shell aside nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:8px;font-size:13px;color:#aebbd0}
+.shell aside nav a.active{background:#182a41;color:#fff}
+@media screen and (max-width:900px){
+  .shell{display:block!important;min-width:0!important;width:100%!important}
+  .shell>.content{width:100%!important;max-width:none!important;margin:0!important;padding:84px 18px 24px!important}
+  .mobileMenu{display:grid!important}
+  .shell>aside{display:flex!important;flex-direction:column!important;position:fixed!important;left:-290px!important;top:0!important;bottom:0!important;width:270px!important;max-width:82vw!important;z-index:80!important;padding:22px 14px!important;transition:left .2s ease!important}
+  .shell>aside.navOpen{left:0!important}
+  .settingsGrid{grid-template-columns:1fr!important}
+  .inlineForm{display:grid!important;grid-template-columns:1fr auto!important}
+  .stackForm{width:100%!important}
+  .panel{min-width:0!important}
+}
+@media screen and (max-width:520px){
+  .content h1{font-size:28px}
+  .settingsGrid{gap:12px}
+  .inlineForm{grid-template-columns:1fr!important}
+  .inlineForm button,.stackForm button{width:100%}
+}
