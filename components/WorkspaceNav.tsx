@@ -1,3 +1,29 @@
-"use client";import Link from "next/link";import {usePathname} from "next/navigation";import {useState} from "react";
-const nav=[["Dashboard","/workspace"],["Instruments","/workspace/instruments"],["Calibration Requests","/workspace/requests"],["Settings","/workspace/settings"]];
-export default function WorkspaceNav({name,role}:{name:string;role:string}){const[open,setOpen]=useState(false);const path=usePathname();return <><button className="mobileMenu" aria-label="Open navigation" onClick={()=>setOpen(!open)}>☰</button>{open&&<button className="navBackdrop" aria-label="Close navigation" onClick={()=>setOpen(false)}/>}<aside className={open?"navOpen":""}><div className="navTop"><Link href="/workspace" className="logo" onClick={()=>setOpen(false)}><b>C</b><span>CalDashPro</span></Link><button className="navClose" aria-label="Close navigation" onClick={()=>setOpen(false)}>×</button></div><nav>{nav.map(([n,h])=><Link href={h} key={h} className={path===h?"active":""} onClick={()=>setOpen(false)}><span className="dot"/>{n}</Link>)}</nav><div className="usercard"><b>{name}</b><span>{role}</span></div></aside></>}
+"use client";
+import Link from "next/link";
+import {usePathname} from "next/navigation";
+import {useEffect,useState} from "react";
+
+const items=[
+  ["Dashboard","/workspace"],
+  ["Instruments","/workspace/instruments"],
+  ["Calibration Requests","/workspace/requests"],
+  ["Settings","/workspace/settings"],
+] as const;
+
+export default function WorkspaceNav({name,role}:{name:string;role:string}){
+  const [open,setOpen]=useState(false);
+  const path=usePathname();
+  useEffect(()=>{setOpen(false)},[path]);
+  return <>
+    <button className="mobileMenu" type="button" aria-label="Open navigation" aria-expanded={open} onClick={()=>setOpen(true)}>☰</button>
+    {open&&<button className="navBackdrop" type="button" aria-label="Close navigation" onClick={()=>setOpen(false)}/>}
+    <aside className={"workspaceSidebar"+(open?" isOpen":"")} aria-label="Workspace navigation">
+      <div className="navTop">
+        <Link href="/workspace" className="logo"><b>C</b><span>CalDashPro</span></Link>
+        <button className="navClose" type="button" aria-label="Close navigation" onClick={()=>setOpen(false)}>×</button>
+      </div>
+      <nav>{items.map(([label,href])=><Link href={href} key={href} className={path===href?"active":""}><span className="dot"/>{label}</Link>)}</nav>
+      <div className="usercard"><b>{name}</b><span>{role}</span></div>
+    </aside>
+  </>;
+}
