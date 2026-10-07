@@ -11,3 +11,5 @@ Copy `.env.example` to `.env.local` for local development. Never commit real env
 
 
 <!-- Cloudflare automatic deployment trigger test: 2026-10-07 -->
+
+<!-- Cloudflare Git auto-deploy verification: 2026-10-07 reconnect -->
