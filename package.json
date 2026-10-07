@@ -25,7 +25,7 @@
     "@types/react": "19.1.16",
     "@types/react-dom": "19.1.9",
     "@vinext/cloudflare": "1.0.1",
-    "@vitejs/plugin-rsc": "0.5.8",
+    "@vitejs/plugin-rsc": "0.5.36",
     "typescript": "5.9.2",
     "vinext": "1.0.1",
     "vite": "8.3.3",
