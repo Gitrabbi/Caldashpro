@@ -6,9 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "dev:vinext": "vite dev",
-    "build:vinext": "vite build",
-    "deploy": "npx @vinext/cloudflare deploy"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@supabase/ssr": "0.7.0",
@@ -16,20 +14,12 @@
     "lucide-react": "0.468.0",
     "next": "16.4.0",
     "react": "19.3.0",
-    "react-dom": "19.3.0",
-    "react-server-dom-webpack": "19.3.0"
+    "react-dom": "19.3.0"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "1.63.0",
     "@types/node": "22.18.6",
     "@types/react": "19.1.16",
     "@types/react-dom": "19.1.9",
-    "@vinext/cloudflare": "1.0.1",
-    "@vitejs/plugin-rsc": "0.5.36",
-    "typescript": "5.9.2",
-    "vinext": "1.0.1",
-    "vite": "8.3.3",
-    "wrangler": "4.148.0"
-  },
-  "type": "module"
+    "typescript": "5.9.2"
+  }
 }
