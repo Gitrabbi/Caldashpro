@@ -12,6 +12,7 @@ const items=[
   ["Calibration Activity","/workspace/activity"],
   ["Certificates","/workspace/certificates"],
   ["Certificate Expiry","/workspace/certificate-expiry"],
+  ["Notifications","/workspace/notifications"],
   ["Settings","/workspace/settings"],
 ] as const;
 
