@@ -10,6 +10,7 @@ const items=[
   ["Calibration Requests","/workspace/requests"],
   ["Calibration Review","/workspace/reviews"],
   ["Calibration Activity","/workspace/activity"],
+  ["Certificates","/workspace/certificates"],
   ["Settings","/workspace/settings"],
 ] as const;
 
