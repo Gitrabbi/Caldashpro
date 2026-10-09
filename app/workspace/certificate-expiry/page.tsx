@@ -1,0 +1,18 @@
+import Link from "next/link";
+import {createClient} from "@/lib/supabase/server";
+export const dynamic="force-dynamic";
+type Certificate={id:string;instrument_id:string|null;certificate_no:string|null;kind:string;issue_date:string|null;expiry_date:string|null;file_path:string|null;external_url:string|null;instruments:{tag_no:string;name:string}|{tag_no:string;name:string}[]|null};
+function remaining(d:string,today:string){return Math.round((Date.parse(d+"T00:00:00Z")-Date.parse(today+"T00:00:00Z"))/86400000)}
+export default async function CertificateExpiry(){
+ const s=await createClient();
+ const {data,error}=await s.from("certificates").select("id,instrument_id,certificate_no,kind,issue_date,expiry_date,file_path,external_url,instruments(tag_no,name)").order("expiry_date",{ascending:true,nullsFirst:false});
+ const rows=(data??[]) as Certificate[],today=new Date().toISOString().slice(0,10);
+ const groups=[{label:"Expired",items:rows.filter(c=>c.expiry_date&&remaining(c.expiry_date,today)<0)},{label:"Expires within 30 days",items:rows.filter(c=>c.expiry_date&&remaining(c.expiry_date,today)>=0&&remaining(c.expiry_date,today)<=30)},{label:"Expires in 31–90 days",items:rows.filter(c=>c.expiry_date&&remaining(c.expiry_date,today)>30&&remaining(c.expiry_date,today)<=90)},{label:"No expiry date",items:rows.filter(c=>!c.expiry_date)}];
+ return <main className="content"><header><div><p className="eyebrow">DOCUMENT CONTROL</p><h1>Certificate Expiry</h1><p>Review certificate validity and prioritize document renewals.</p></div><Link className="primary" href="/workspace/certificates">Certificate register</Link></header>
+ {error&&<div className="notice" role="alert">{error.message}</div>}
+ <section className="cards">{groups.map(g=><article key={g.label}><div><span>{g.label}</span><strong>{g.items.length}</strong></div></article>)}</section>
+ <p><small>Expiry is calculated from each certificate record's expiry date. A certificate expiry date is not necessarily the instrument's next calibration due date. These are live dashboard indicators, not automated notifications.</small></p>
+ {groups.map(g=><section key={g.label} className="panel tablePanel" style={{marginBottom:20}}><h2 style={{padding:"18px 20px 0"}}>{g.label} ({g.items.length})</h2>{g.items.length?<div className="tableWrap"><table><thead><tr><th>Certificate</th><th>Instrument</th><th>Type</th><th>Issued</th><th>Expires</th><th>Remaining</th><th>Document</th></tr></thead><tbody>{g.items.map(c=>{const i=Array.isArray(c.instruments)?c.instruments[0]:c.instruments;const days=c.expiry_date?remaining(c.expiry_date,today):null;return <tr key={c.id}><td><b>{c.certificate_no??"—"}</b></td><td>{i?.tag_no??"—"}<small className="cellSub">{i?.name??""}</small></td><td>{c.kind}</td><td>{c.issue_date??"—"}</td><td>{c.expiry_date??"—"}</td><td>{days===null?"Not scheduled":days<0?Math.abs(days)+" days expired":days===0?"Expires today":days+" days remaining"}</td><td><Link href="/workspace/certificates">Open register →</Link></td></tr>})}</tbody></table></div>:<div className="empty">No certificates in this category.</div>}</section>)}
+ <section className="panel"><h2>Other certificates</h2><p>{rows.filter(c=>c.expiry_date&&remaining(c.expiry_date,today)>90).length} certificates expire in more than 90 days.</p><p>For automatic email or in-app alerts, a notification service and scheduled job must be configured separately.</p></section>
+ </main>;
+}
