@@ -6,6 +6,7 @@ import {useEffect,useState} from "react";
 const items=[
   ["Dashboard","/workspace"],
   ["Instruments","/workspace/instruments"],
+  ["Calibration Schedule","/workspace/schedule"],
   ["Calibration Requests","/workspace/requests"],
   ["Settings","/workspace/settings"],
 ] as const;
