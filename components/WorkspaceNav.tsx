@@ -8,6 +8,7 @@ const items=[
   ["Instruments","/workspace/instruments"],
   ["Calibration Schedule","/workspace/schedule"],
   ["Calibration Requests","/workspace/requests"],
+  ["Calibration Review","/workspace/reviews"],
   ["Settings","/workspace/settings"],
 ] as const;
 
