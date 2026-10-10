@@ -1,3 +1,4 @@
+import NotificationInbox from "./NotificationInbox";
 import NotificationList, {type Alert} from "./NotificationList";
 import Link from "next/link";
 import {createClient} from "@/lib/supabase/server";
@@ -16,6 +17,7 @@ export default async function Notifications(){
  
  return <main className="content"><header><div><p className="eyebrow">ACTION CENTER</p><h1>Notifications</h1><p>Live calibration and certificate deadline alerts.</p></div><Link href="/workspace/schedule">Calibration schedule →</Link></header>
  {(i.error||c.error)&&<div className="notice" role="alert">{i.error?.message??c.error?.message}</div>}
+ <NotificationInbox/>
  <NotificationList alerts={alerts as Alert[]}/>
  <section className="panel" style={{marginTop:20}}><h2>Notification delivery</h2><p>Email, Telegram and scheduled reminders are not enabled yet. This page does not send alerts automatically.</p></section>
  </main>;
