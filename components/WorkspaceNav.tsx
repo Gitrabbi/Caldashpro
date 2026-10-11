@@ -13,6 +13,7 @@ const items=[
   ["Certificates","/workspace/certificates"],
   ["Certificate Expiry","/workspace/certificate-expiry"],
   ["Notifications","/workspace/notifications"],
+  ["Reports","/workspace/reports"],
   ["Settings","/workspace/settings"],
 ] as const;
 
