@@ -12,6 +12,7 @@ const items=[
   ["Calibration Activity","/workspace/activity"],
   ["Audit Trail","/workspace/audit"],
   ["Certificates","/workspace/certificates"],
+  ["Reference Standards","/workspace/standards"],
   ["Certificate Expiry","/workspace/certificate-expiry"],
   ["Notifications","/workspace/notifications"],
   ["Reports","/workspace/reports"],
