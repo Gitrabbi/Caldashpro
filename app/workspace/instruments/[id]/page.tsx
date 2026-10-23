@@ -1,5 +1,6 @@
 import Link from "next/link";
 import DriftChart from "./DriftChart";
+import CalibrationTemplate from "./CalibrationTemplate";
 import {notFound} from "next/navigation";
 import {createClient} from "@/lib/supabase/server";
 
@@ -31,6 +32,7 @@ export default async function InstrumentDetail({params}:{params:Promise<{id:stri
    <article className="panel"><h2>Instrument specifications</h2><dl>{specs.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{show(value)}</dd></div>)}</dl></article>
    <article className="panel"><h2>Calibration requirements</h2><dl>{schedule.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{show(value)}</dd></div>)}</dl><p><Link href="/workspace/requests">View calibration requests →</Link></p>{i.notes&&<><h3>Notes</h3><p style={{whiteSpace:"pre-wrap"}}>{i.notes}</p></>}</article>
   </section>
+  <CalibrationTemplate instrumentId={id}/>
   <section className="panel"><h2>Long-term calibration drift</h2>{points.error?<p className="notice">Measurement-point history unavailable. Apply the measurement points SQL migration.</p>:<DriftChart points={(points.data??[]) as any}/>}</section>
   <section className="panel"><h2>Calibration history</h2>{history.error?<p role="alert">Unable to load calibration history: {history.error.message}</p>:history.data?.length?history.data.map(e=><div className="record" key={e.id}><div><b>{date(e.calibration_date)}</b><span>{show(e.result)} · {e.procedure_reference??"No procedure reference"} · Next due {date(e.next_due_date)}</span></div><span>{e.approved_at?"Approved":<Link href={"/workspace/calibrations/"+e.id}>Review calibration →</Link>}</span></div>):<div className="empty">No calibration history yet.<small>Recorded calibrations will appear here.</small></div>}</section>
   <section className="panel"><h2>Certificates</h2>{certificates.error?<p role="alert">Unable to load certificates: {certificates.error.message}</p>:certificates.data?.length?certificates.data.map(c=><div className="record" key={c.id}><div><b>{c.certificate_no??"Certificate"}</b><span>{show(c.kind)} · Issued {date(c.issue_date)} · Expires {date(c.expiry_date)}</span></div>{c.external_url?.startsWith("https://")?<a href={c.external_url} target="_blank" rel="noopener noreferrer">Open certificate ↗</a>:null}</div>):<div className="empty">No certificates yet.<small>Linked certificates will appear here.</small></div>}</section>
