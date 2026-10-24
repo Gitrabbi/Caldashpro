@@ -5,6 +5,7 @@ import {useEffect,useState} from "react";
 
 const items=[
   ["Dashboard","/workspace"],
+  ["🟣 Demo workspace","/workspace/demo"],
   ["Instruments","/workspace/instruments"],
   ["Calibration Schedule","/workspace/schedule"],
   ["Calibration Requests","/workspace/requests"],
