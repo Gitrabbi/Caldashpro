@@ -29,3 +29,10 @@ drop policy if exists calibration_points_update on public.calibration_measuremen
 create policy calibration_points_update on public.calibration_measurement_points for update to authenticated
 using(exists(select 1 from public.calibration_events e where e.id=calibration_event_id and e.technician_id=(select auth.uid()) and e.approved_at is null and e.review_status='rejected'))
 with check(exists(select 1 from public.calibration_events e where e.id=calibration_event_id and e.technician_id=(select auth.uid()) and e.approved_at is null and e.review_status='rejected'));
+
+-- Allow a technician to read back their submitted readings and correct rejected readings.
+-- Apply again if this migration was run before the update.
+drop policy if exists calibration_points_update on public.calibration_measurement_points;
+create policy calibration_points_update on public.calibration_measurement_points for update to authenticated
+using(exists(select 1 from public.calibration_events e where e.id=calibration_event_id and e.technician_id=(select auth.uid()) and e.approved_at is null and e.review_status='rejected'))
+with check(exists(select 1 from public.calibration_events e where e.id=calibration_event_id and e.technician_id=(select auth.uid()) and e.approved_at is null and e.review_status='rejected'));
