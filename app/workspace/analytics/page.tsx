@@ -28,7 +28,7 @@ export default function Analytics(){
  const overdue=instruments.filter(i=>i.days_to_due!==null&&i.days_to_due<0),soon=instruments.filter(i=>i.days_to_due!==null&&i.days_to_due>=0&&i.days_to_due<=30),missing=instruments.filter(i=>!i.next_due_date);
  const valid=instruments.filter(i=>i.days_to_due!==null&&i.days_to_due>=0),pct=instruments.length?Math.round(valid.length/instruments.length*100):0;
  const buckets=[{name:"0–7 days",min:0,max:7},{name:"8–30 days",min:8,max:30},{name:"31–60 days",min:31,max:60},{name:"61–90 days",min:61,max:90}];
- const areaRows=areas.map(a=>({id:a.id,name:a.name,items:instruments.filter(i=>i.area_id===a.id)})).filter(a=>a.items.length).sort((a,b)=>b.items.length-a.items.length);
+ const areaRows=areas.map(a=>({id:a.id,name:a.name??"Unnamed area",items:instruments.filter(i=>i.area_id===a.id)})).filter(a=>a.items.length).sort((a,b)=>b.items.length-a.items.length);
  const groupRows=groups.map(g=>({id:g.id,name:g.name??"Unknown",items:instruments.filter(i=>i.instrument_group_id===g.id)})).filter(g=>g.items.length).sort((a,b)=>b.items.length-a.items.length).slice(0,12);
  const frequency=new Map<string,Inst[]>();for(const i of instruments){const k=i.calibration_frequency?.trim()||"Unspecified";frequency.set(k,[...(frequency.get(k)??[]),i])}
  const technician=new Map<string,Ev[]>();for(const e of events){const k=e.technician_id??"unassigned";technician.set(k,[...(technician.get(k)??[]),e])}
