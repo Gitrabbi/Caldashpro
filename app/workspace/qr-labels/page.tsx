@@ -6,7 +6,7 @@ import {createClient} from "@/lib/supabase/client";
 
 type Instrument={id:string;tag_no:string;name:string;area_id:string|null;location_id:string|null;calibration_status:string|null;state:string|null};
 type Ref={id:string;name:string;area_id?:string|null};
-type Label={instrument_id:string;printed_at:string|null;print_count:number};
+type Label={instrument_id:string;printed_at:string|null;print_count:number;printed_tag_no:string|null;printed_instrument_name:string|null};
 export default function QRLabels(){
  const db=useMemo(()=>createClient(),[]);
  const [instruments,setInstruments]=useState<Instrument[]>([]);
@@ -22,37 +22,39 @@ export default function QRLabels(){
  db.from("instrument_calibration_status").select("id,tag_no,name,area_id,location_id,calibration_status,state").order("tag_no").limit(5000),
  db.from("areas").select("id,name").order("name"),
  db.from("locations").select("id,name,area_id").order("name"),
- db.from("instrument_qr_labels").select("instrument_id,printed_at,print_count").limit(5000)
+ db.from("instrument_qr_labels").select("instrument_id,printed_at,print_count,printed_tag_no,printed_instrument_name").limit(5000)
  ]);
  setInstruments(i.data??[]);setAreas(a.data??[]);setLocations(l.data??[]);setLabels(q.data??[]);
  setError([i.error,a.error,l.error,q.error].filter(Boolean).map(e=>e?.message).join("; "));
  setLoading(false);
  })()},[db]);
  const labelMap=useMemo(()=>new Map(labels.map(x=>[x.instrument_id,x])),[labels]);
- const filtered=instruments.filter(i=>(i.tag_no+" "+i.name).toLowerCase().includes(search.toLowerCase())&&(!area||i.area_id===area)&&(!location||i.location_id===location)&&(status==="All"||i.calibration_status===status)&&(printFilter==="All"||(printFilter==="Never printed"?!labelMap.get(i.id)?.printed_at:!!labelMap.get(i.id)?.printed_at)));
+ const filtered=instruments.filter(i=>(i.tag_no+" "+i.name).toLowerCase().includes(search.toLowerCase())&&(!area||i.area_id===area)&&(!location||i.location_id===location)&&(status==="All"||i.calibration_status===status)&&(printFilter==="All"||(printFilter==="Never printed"?!labelMap.get(i.id)?.printed_at:printFilter==="Needs reprint"?needsReprint(i):!!labelMap.get(i.id)?.printed_at)));
  const chosen=filtered.filter(i=>selected.includes(i.id));
  const printable=chosen.length?chosen:filtered;
+ const needsReprint=(i:Instrument)=>{const l=labelMap.get(i.id);return !!l?.printed_at&&(l.printed_tag_no!==i.tag_no||l.printed_instrument_name!==i.name)};
  const missing=instruments.filter(i=>!labelMap.get(i.id)?.printed_at).length;
+ const outdated=instruments.filter(needsReprint).length;
  const url=(id:string)=>origin+"/i/"+encodeURIComponent(id);
  function printLabels(){if(!printable.length)return;setPrintMode(true);setNotice("Print preview ready. Use your browser Print option and choose Save as PDF or a printer.");setTimeout(()=>window.print(),350)}
  async function markPrinted(){if(!printable.length||marking)return;const ids=printable.map(x=>x.id);if(!window.confirm("Confirm that "+ids.length+" labels were actually printed or saved for printing?"))return;setMarking(true);const {error:err}=await db.rpc("mark_instrument_qr_printed",{p_instrument_ids:ids});if(err){setNotice(err.message)}else{const q=await db.from("instrument_qr_labels").select("instrument_id,printed_at,print_count").limit(5000);if(q.data)setLabels(q.data);setNotice("Print status recorded for "+ids.length+" instruments.")}setMarking(false)}
  return <main className="content qrManager">
  <header className="qrScreenOnly"><div><p className="eyebrow">FIELD IDENTIFICATION · LIVE WORKSPACE</p><h1>Instrument QR Labels</h1><p>Scan a label to open that instrument's live information and calibration history.</p></div><Link href="/workspace/instruments">← Instrument register</Link></header>
  {error&&<p role="alert" className="notice qrScreenOnly">{error.includes("instrument_qr_labels")?"QR registry is not configured. Run supabase/manual/instrument_qr_labels.sql in CalDashPro Supabase. "+error:error}</p>}
- <section className="cards qrScreenOnly"><article><div><span>Live instruments</span><strong>{instruments.length}</strong></div></article><article><div><span>Not yet printed</span><strong>{missing}</strong></div></article><article><div><span>Printed labels</span><strong>{instruments.length-missing}</strong></div></article><article><div><span>Filtered results</span><strong>{filtered.length}</strong></div></article></section>
+ <section className="cards qrScreenOnly"><article><div><span>Live instruments</span><strong>{instruments.length}</strong></div></article><article><div><span>Not yet printed</span><strong>{missing}</strong></div></article><article><div><span>Needs reprint</span><strong>{outdated}</strong></div></article><article><div><span>Filtered results</span><strong>{filtered.length}</strong></div></article></section>
  <section className="panel qrScreenOnly"><h2>Find and prepare labels</h2><div className="qrFilters">
  <label>Search<input placeholder="Tag or instrument name" value={search} onChange={e=>setSearch(e.target.value)}/></label>
  <label>Area<select value={area} onChange={e=>{setArea(e.target.value);setLocation("")}}><option value="">All areas</option>{areas.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></label>
  <label>Location<select value={location} onChange={e=>setLocation(e.target.value)}><option value="">All locations</option>{locations.filter(l=>!area||l.area_id===area).map(l=><option key={l.id} value={l.id}>{l.name}</option>)}</select></label>
  <label>Calibration status<select value={status} onChange={e=>setStatus(e.target.value)}>{["All","Valid","Expiring Soon","Critical","Overdue","No Due Date"].map(s=><option key={s}>{s}</option>)}</select></label>
- <label>QR label status<select value={printFilter} onChange={e=>setPrintFilter(e.target.value)}>{["All","Never printed","Previously printed"].map(s=><option key={s}>{s}</option>)}</select></label>
- </div><p><small>QR codes are available automatically for every instrument, including newly registered instruments. “Never printed” identifies instruments without a recorded print confirmation, not missing QR images.</small></p>
+ <label>QR label status<select value={printFilter} onChange={e=>setPrintFilter(e.target.value)}>{["All","Never printed","Needs reprint","Previously printed"].map(s=><option key={s}>{s}</option>)}</select></label>
+ </div><p><small>QR codes are available automatically for every instrument, including newly registered instruments. “Never printed” identifies instruments without a recorded print confirmation. “Needs reprint” identifies printed labels whose tag or name has since changed. QR codes remain valid.</small></p>
  <div className="qrActions"><button type="button" onClick={()=>setSelected([...new Set([...selected,...filtered.map(i=>i.id)])])}>Select all filtered</button><button type="button" className="secondary" onClick={()=>setSelected([])}>Clear selection</button><button type="button" onClick={printLabels} disabled={loading||!printable.length}>Print / Save PDF ({printable.length})</button><button type="button" className="secondary" onClick={markPrinted} disabled={marking||!printable.length||!!error}>{marking?"Recording…":"Mark as printed"}</button></div>
  {notice&&<p role="status">{notice}</p>}
  <p><small>{selected.length?"Printing selected instruments that match the current filters.":"No selection: printing all filtered instruments."} Use 100% scale and test a label with your phone before printing a full batch.</small></p></section>
  <section className="qrLabelGrid" aria-label="Printable QR instrument labels">
  {loading?<p>Loading instruments…</p>:printable.length===0?<p className="qrScreenOnly">No instruments match your filters.</p>:printable.map(i=><article className="qrLabel" key={i.id}>
- <div className="qrSelect qrScreenOnly"><label><input type="checkbox" checked={selected.includes(i.id)} onChange={e=>setSelected(old=>e.target.checked?[...old,i.id]:old.filter(x=>x!==i.id))}/> Select label</label><span>{labelMap.get(i.id)?.printed_at?"Printed":"Not printed"}</span></div>
+ <div className="qrSelect qrScreenOnly"><label><input type="checkbox" checked={selected.includes(i.id)} onChange={e=>setSelected(old=>e.target.checked?[...old,i.id]:old.filter(x=>x!==i.id))}/> Select label</label><span>{needsReprint(i)?"Needs reprint":labelMap.get(i.id)?.printed_at?"Printed":"Not printed"}</span></div>
  <div className="qrLabelBody"><div className="qrCode">{origin&&<QRCodeSVG value={url(i.id)} size={124} level="H" marginSize={1} bgColor="#ffffff" fgColor="#111827"/>}</div><div className="qrLabelInfo"><b className="qrBrand">CalDashPro</b><strong>{i.tag_no}</strong><span>{i.name}</span><small>Scan for instrument information</small><Link className="qrScreenOnly" href={"/workspace/instruments/"+i.id}>View instrument →</Link></div></div>
  </article>)}
  </section><style jsx global>{`
