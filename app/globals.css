@@ -175,3 +175,16 @@ th,td{border-bottom:1px solid rgba(121,145,181,.16)}
 .insightTrend{display:flex;align-items:flex-end;gap:12px;min-height:205px;overflow-x:auto}.insightTrendCol{flex:1 0 42px;display:flex;flex-direction:column;align-items:center;gap:9px}.insightTrendStacks{height:160px;width:min(100%,58px);display:flex;flex-direction:column-reverse;justify-content:flex-start;background:#1b374a;border-bottom:1px solid #658599}.insightTrendStacks span{width:100%;display:block;min-height:0}.insightTrendCol small{font-size:11px}.insightLegend{font-size:12px!important}
 .insightDrill{margin:22px 0}.insightDrillHead{display:flex;justify-content:space-between;gap:12px;align-items:center}.insightDrillHead button{padding:8px 14px}
 @media(max-width:950px){.insightGrid{grid-template-columns:minmax(0,1fr)}}
+
+
+/* Anonymous QR scan view — intentionally outside the authenticated workspace */
+.publicInstrument{min-height:100dvh;background:radial-gradient(circle at 70% 5%,#234c64,#071726 65%);color:#edf8ff;padding:30px 14px;display:flex;justify-content:center;align-items:flex-start}
+.publicInstrumentCard{width:min(100%,660px);background:linear-gradient(145deg,#1b3d53,#10263a);border:1px solid #466b80;border-radius:20px;padding:clamp(18px,4vw,36px);box-shadow:0 18px 60px #0007}
+.publicInstrumentBrand{font-size:12px;font-weight:800;letter-spacing:1.5px;color:#5bdeeb}
+.publicInstrumentCard h1{font-size:clamp(30px,7vw,48px);color:white;margin:14px 0 4px;overflow-wrap:anywhere}
+.publicInstrumentName{font-size:19px;color:#c5dbea}
+.publicInstrumentStatus{display:inline-block;background:#12576a;border:1px solid #43b7c8;padding:8px 13px;border-radius:25px;margin:10px 0 20px}
+.publicInstrumentCard dl{margin:0}.publicInstrumentCard dl>div{display:grid;grid-template-columns:minmax(115px,42%) 1fr;gap:12px;padding:12px 0;border-bottom:1px solid #35546a}
+.publicInstrumentCard dt{color:#a7c4d7}.publicInstrumentCard dd{margin:0;font-weight:650;overflow-wrap:anywhere}
+.publicInstrumentFoot{color:#bdd0de;font-size:12px;line-height:1.6;margin-top:25px}
+.publicInstrumentCard a{display:inline-block;color:#6ce5f3;margin-top:12px}
