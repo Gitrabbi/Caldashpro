@@ -2,33 +2,66 @@
 import {useEffect,useMemo,useState} from "react";
 import Link from "next/link";
 import {createClient} from "@/lib/supabase/client";
-type Instrument={id:string;tag_no:string;name:string;calibration_status:string|null;days_to_due:number|null;next_due_date:string|null;area_id:string|null};
-type Event={instrument_id:string;result:string;review_status:string;calibration_date:string};
+type Inst={id:string;tag_no:string;name:string;calibration_status:string|null;days_to_due:number|null;next_due_date:string|null;area_id:string|null;instrument_group_id:string|null;calibration_frequency:string|null};
+type Ev={id:string;instrument_id:string;calibration_date:string;result:string;review_status:string;technician_id:string|null};
+type Req={id:string;status:string;assigned_to:string|null;due_date:string|null};
+type Named={id:string;name?:string;full_name?:string};
+const colors=["#3ed6c2","#7486ff","#f9ad38","#ff6d82","#b68bff","#58b6f6"];
+function ChartBars({data,onPick}: {data:{name:string;value:number}[];onPick?:(name:string)=>void}){
+ const max=Math.max(1,...data.map(x=>x.value));
+ return <div className="insightBars">{data.map((d,i)=><button type="button" className="insightBar" key={d.name} onClick={()=>onPick?.(d.name)} title={d.name+": "+d.value} style={{cursor:onPick?"pointer":"default"}}><span className="insightBarNumber">{d.value}</span><span className="insightBarTrack"><span style={{height:(100*d.value/max)+"%",background:colors[i%colors.length]}}/></span><span className="insightBarLabel">{d.name}</span></button>)}</div>
+}
+function Meter({label,value,total,color="#3ed6c2",onClick}:{label:string;value:number;total:number;color?:string;onClick?:()=>void}){return <button type="button" className="insightMeter" onClick={onClick}><span>{label}<b>{value} / {total}</b></span><span className="insightMeterTrack"><span style={{width:(total?100*value/total:0)+"%",background:color}}/></span></button>}
 export default function Analytics(){
  const db=useMemo(()=>createClient(),[]);
- const [instruments,setInstruments]=useState<Instrument[]>([]);
- const [events,setEvents]=useState<Event[]>([]);
- const [areas,setAreas]=useState<{id:string;name:string}[]>([]);
- const [loading,setLoading]=useState(true);
- const [error,setError]=useState("");
- const [analysis,setAnalysis]=useState("");
- const [aiError,setAiError]=useState("");
- const [thinking,setThinking]=useState(false);
- useEffect(()=>{void(async()=>{const [i,e,a]=await Promise.all([db.from("instrument_calibration_status").select("id,tag_no,name,calibration_status,days_to_due,next_due_date,area_id").eq("state","active").limit(2000),db.from("calibration_events").select("instrument_id,result,review_status,calibration_date").limit(3000),db.from("areas").select("id,name")]);setInstruments(i.data??[]);setEvents(e.data??[]);setAreas(a.data??[]);setError(i.error?.message??e.error?.message??a.error?.message??"");setLoading(false)})()},[db]);
- const overdue=instruments.filter(i=>i.calibration_status==="Overdue");
- const due30=instruments.filter(i=>i.days_to_due!==null&&i.days_to_due>=0&&i.days_to_due<=30);
- const unscheduled=instruments.filter(i=>!i.next_due_date);
- const priority=instruments.filter(i=>i.calibration_status==="Overdue"||(i.days_to_due!==null&&i.days_to_due<=30)).sort((a,b)=>(a.days_to_due??99999)-(b.days_to_due??99999)).slice(0,15);
- const byArea=areas.map(a=>({name:a.name,rows:instruments.filter(i=>i.area_id===a.id)})).filter(a=>a.rows.length).sort((a,b)=>b.rows.filter(x=>x.calibration_status==="Overdue").length-a.rows.filter(x=>x.calibration_status==="Overdue").length);
- async function runAI(){setThinking(true);setAiError("");setAnalysis("");try{const response=await fetch("/api/instrument-ai",{method:"POST"});const data=await response.json();if(!response.ok)throw new Error(data.error||"AI analysis unavailable");setAnalysis(data.analysis||"No analysis returned")}catch(e){setAiError(e instanceof Error?e.message:"Analysis failed")}finally{setThinking(false)}}
+ const [instruments,setInstruments]=useState<Inst[]>([]),[events,setEvents]=useState<Ev[]>([]),[requests,setRequests]=useState<Req[]>([]);
+ const [areas,setAreas]=useState<Named[]>([]),[groups,setGroups]=useState<Named[]>([]),[profiles,setProfiles]=useState<Named[]>([]);
+ const [loading,setLoading]=useState(true),[error,setError]=useState(""),[analysis,setAnalysis]=useState(""),[aiError,setAiError]=useState(""),[thinking,setThinking]=useState(false);
+ const [drill,setDrill]=useState<{title:string;ids:string[]}|null>(null);
+ useEffect(()=>{void(async()=>{const results=await Promise.all([
+ db.from("instrument_calibration_status").select("id,tag_no,name,calibration_status,days_to_due,next_due_date,area_id,instrument_group_id,calibration_frequency").eq("state","active").limit(2000),
+ db.from("calibration_events").select("id,instrument_id,calibration_date,result,review_status,technician_id").limit(3000),
+ db.from("calibration_requests").select("id,status,assigned_to,due_date").limit(3000),
+ db.from("areas").select("id,name"),db.from("instrument_groups").select("id,name"),db.from("profiles").select("id,full_name").eq("active",true)
+ ]);setInstruments(results[0].data??[]);setEvents(results[1].data??[]);setRequests(results[2].data??[]);setAreas(results[3].data??[]);setGroups(results[4].data??[]);setProfiles(results[5].data??[]);
+ setError(results.filter(x=>x.error).map(x=>x.error?.message).join("; "));setLoading(false)})()},[db]);
+ const overdue=instruments.filter(i=>i.days_to_due!==null&&i.days_to_due<0),soon=instruments.filter(i=>i.days_to_due!==null&&i.days_to_due>=0&&i.days_to_due<=30),missing=instruments.filter(i=>!i.next_due_date);
+ const valid=instruments.filter(i=>i.days_to_due!==null&&i.days_to_due>=0),pct=instruments.length?Math.round(valid.length/instruments.length*100):0;
+ const buckets=[{name:"0–7 days",min:0,max:7},{name:"8–30 days",min:8,max:30},{name:"31–60 days",min:31,max:60},{name:"61–90 days",min:61,max:90}];
+ const areaRows=areas.map(a=>({id:a.id,name:a.name,items:instruments.filter(i=>i.area_id===a.id)})).filter(a=>a.items.length).sort((a,b)=>b.items.length-a.items.length);
+ const groupRows=groups.map(g=>({id:g.id,name:g.name??"Unknown",items:instruments.filter(i=>i.instrument_group_id===g.id)})).filter(g=>g.items.length).sort((a,b)=>b.items.length-a.items.length).slice(0,12);
+ const frequency=new Map<string,Inst[]>();for(const i of instruments){const k=i.calibration_frequency?.trim()||"Unspecified";frequency.set(k,[...(frequency.get(k)??[]),i])}
+ const technician=new Map<string,Ev[]>();for(const e of events){const k=e.technician_id??"unassigned";technician.set(k,[...(technician.get(k)??[]),e])}
+ const people=new Map(profiles.map(p=>[p.id,p.full_name??p.id]));
+ const techRows=[...technician].map(([id,items])=>({id,name:people.get(id)??(id==="unassigned"?"Unassigned":id.slice(0,8)),items})).sort((a,b)=>b.items.length-a.items.length).slice(0,10);
+ const months=Array.from({length:6},(_,i)=>{const d=new Date();d.setUTCDate(1);d.setUTCMonth(d.getUTCMonth()-(5-i));return {key:d.toISOString().slice(0,7),name:d.toLocaleString("en-GB",{month:"short",year:"2-digit",timeZone:"UTC"})}});
+ const monthEvents=months.map(m=>({name:m.name,pass:events.filter(e=>e.calibration_date?.startsWith(m.key)&&e.result==="pass").length,fail:events.filter(e=>e.calibration_date?.startsWith(m.key)&&e.result==="fail").length,adjusted:events.filter(e=>e.calibration_date?.startsWith(m.key)&&e.result==="adjusted").length}));
+ const trendMax=Math.max(1,...monthEvents.map(x=>x.pass+x.fail+x.adjusted));
+ const requestDone=requests.filter(r=>r.status==="completed").length;
+ const openRequests=requests.filter(r=>r.status!=="completed").length;
+ const priority=[...overdue,...soon].sort((a,b)=>(a.days_to_due??99999)-(b.days_to_due??99999)).slice(0,12);
+ const drillRows=drill?instruments.filter(i=>drill.ids.includes(i.id)):[];
+ async function runAI(){setThinking(true);setAiError("");setAnalysis("");try{const r=await fetch("/api/instrument-ai",{method:"POST"});const j=await r.json();if(!r.ok)throw Error(j.error||"AI analysis unavailable");setAnalysis(j.analysis||"No analysis returned")}catch(e){setAiError(e instanceof Error?e.message:"AI request failed")}finally{setThinking(false)}}
+ const show=(title:string,items:Inst[])=>setDrill({title,ids:items.map(i=>i.id)});
  return <main className="content intelligencePage">
- <header><div><p className="eyebrow">LIVE DATA · INSTRUMENT INTELLIGENCE</p><h1>Instrument AI Analytics</h1><p>Evidence-led calibration insights and model-generated recommendations.</p></div><Link className="primary" href="/workspace">Overview</Link></header>
- {error&&<p role="alert" className="notice">{error}</p>}
- {loading?<p>Loading live calibration records…</p>:<>
- <section className="cards">{[["Active instruments",instruments.length],["Overdue",overdue.length],["Due within 30 days",due30.length],["Missing due dates",unscheduled.length],["Failed calibration events",events.filter(e=>e.result==="fail").length],["Approved events",events.filter(e=>e.review_status==="approved").length]].map(([k,v])=><article key={k}><div><span>{k}</span><strong>{v}</strong></div></article>)}</section>
- <section className="panel"><h2>AI calibration intelligence</h2><p>Generate a new assessment using a real AI model and the latest available Live records. AI observations require engineering review.</p><button className="primary" disabled={thinking} onClick={runAI}>{thinking?"Analyzing records…":"Generate AI analysis"}</button>{aiError&&<p role="alert">{aiError}</p>}{analysis&&<div className="aiResponse">{analysis}</div>}</section>
- <section className="grid" style={{marginTop:20}}><article className="panel"><h2>Priority instruments</h2><p>Scheduling exposure, not predicted equipment failure.</p><div className="statusList">{priority.map(i=><div key={i.id}><Link href={"/workspace/instruments/"+i.id}>{i.tag_no} · {i.name}</Link><b>{i.days_to_due===null?"Unscheduled":i.days_to_due<0?Math.abs(i.days_to_due)+" days overdue":i.days_to_due+" days remaining"}</b></div>)}</div>{!priority.length&&<p>No overdue or due-soon instruments.</p>}</article>
- <article className="panel"><h2>Exposure by plant area</h2>{byArea.map(a=>{const n=a.rows.filter(i=>i.calibration_status==="Overdue").length;return <div key={a.name} style={{marginBottom:18}}><div className="statusList"><div><span>{a.name}</span><b>{n} / {a.rows.length} overdue</b></div></div><div className="riskTrack"><div style={{width:(n/a.rows.length*100)+"%"}}/></div></div>})}{!byArea.length&&<p>No plant area data available.</p>}</article></section>
- <p><small>Source: live Supabase calibration tables. Maximum 2,000 active instruments and 3,000 calibration events per query; large datasets may require pagination. AI is not a validated predictive-maintenance model.</small></p>
+ <header><div><p className="eyebrow">LIVE WORKSPACE · CALIBRATION INTELLIGENCE</p><h1>Instrument AI Analytics</h1><p>Interactive compliance, performance and calibration intelligence grounded in Live records.</p></div><Link className="primary" href="/workspace">Dashboard</Link></header>
+ {error&&<p role="alert" className="notice">Some analytics sources are unavailable: {error}</p>}
+ {loading?<p>Loading live analytics…</p>:<>
+ <section className="cards">{[["Active instruments",instruments.length],["Compliance",pct+"%"],["Overdue",overdue.length],["Due in 30 days",soon.length],["No due date",missing.length],["Open requests",openRequests],["Completed requests",requestDone],["Failed events",events.filter(e=>e.result==="fail").length]].map(([label,value])=><article key={label}><div><span>{label}</span><strong>{value}</strong></div></article>)}</section>
+ <section className="panel"><h2>✦ AI Calibration Intelligence</h2><p>Generate model-backed analysis using current live instrument and calibration records. AI recommendations are advisory and require engineering verification.</p><button className="primary" disabled={thinking} onClick={runAI}>{thinking?"Analyzing live data…":"Generate AI insights"}</button>{aiError&&<p role="alert">{aiError}</p>}{analysis&&<div className="aiResponse">{analysis}</div>}</section>
+ <section className="insightGrid">
+ <article className="panel"><h2>Overall calibration status</h2><p>Select a category to inspect its instruments.</p><div className="insightStatus"><button onClick={()=>show("Valid instruments",valid)}><strong style={{color:"#3ed6c2"}}>{valid.length}</strong><span>Valid</span></button><button onClick={()=>show("Due in 30 days",soon)}><strong style={{color:"#f9ad38"}}>{soon.length}</strong><span>Due soon</span></button><button onClick={()=>show("Overdue instruments",overdue)}><strong style={{color:"#ff6d82"}}>{overdue.length}</strong><span>Overdue</span></button><button onClick={()=>show("No due date",missing)}><strong>{missing.length}</strong><span>Unscheduled</span></button></div><div className="insightStack">{[["Valid",valid.length,"#3ed6c2"],["Overdue",overdue.length,"#ff6d82"],["Missing due date",missing.length,"#8b98b1"]].map(([k,v,color])=><span key={String(k)} style={{width:(instruments.length?100*Number(v)/instruments.length:0)+"%",background:String(color)}} title={k+": "+v}/>)}</div></article>
+ <article className="panel"><h2>Upcoming calibrations · 90 days</h2><p>Distinct future due-date windows (no double counting).</p><ChartBars data={buckets.map(b=>({name:b.name,value:instruments.filter(i=>i.days_to_due!==null&&i.days_to_due>=b.min&&i.days_to_due<=b.max).length}))} onPick={name=>{const b=buckets.find(x=>x.name===name);if(b)show(name,instruments.filter(i=>i.days_to_due!==null&&i.days_to_due>=b.min&&i.days_to_due<=b.max))}}/></article>
+ <article className="panel"><h2>Calibration results · 6 months</h2><p>Recorded pass, adjusted and fail results by calibration date.</p><div className="insightTrend">{monthEvents.map(m=><div key={m.name} className="insightTrendCol"><div className="insightTrendStacks" title={m.name+": "+m.pass+" pass, "+m.adjusted+" adjusted, "+m.fail+" fail"}><span style={{height:(100*m.pass/trendMax)+"%",background:"#3ed6c2"}}/><span style={{height:(100*m.adjusted/trendMax)+"%",background:"#f9ad38"}}/><span style={{height:(100*m.fail/trendMax)+"%",background:"#ff6d82"}}/></div><small>{m.name}</small></div>)}</div><p className="insightLegend">● Pass (teal)　● Adjusted (amber)　● Fail (red)</p></article>
+ <article className="panel"><h2>Area compliance</h2><p>Select an area to inspect its instruments.</p>{areaRows.map(a=><Meter key={a.id} label={a.name} value={a.items.filter(i=>i.days_to_due!==null&&i.days_to_due>=0).length} total={a.items.length} onClick={()=>show(a.name,a.items)}/>)}</article>
+ <article className="panel"><h2>Instruments by area</h2><ChartBars data={areaRows.slice(0,10).map(a=>({name:a.name,value:a.items.length}))} onPick={name=>{const a=areaRows.find(a=>a.name===name);if(a)show(a.name,a.items)}}/></article>
+ <article className="panel"><h2>Instruments by group</h2><ChartBars data={groupRows.map(g=>({name:g.name,value:g.items.length}))} onPick={name=>{const g=groupRows.find(g=>g.name===name);if(g)show(g.name,g.items)}}/></article>
+ <article className="panel"><h2>Calibration frequency</h2><p>Based on recorded frequency values.</p>{[...frequency].sort((a,b)=>b[1].length-a[1].length).map(([name,items],i)=><Meter key={name} label={name} value={items.length} total={instruments.length} color={colors[i%colors.length]} onClick={()=>show(name,items)}/>)}</article>
+ <article className="panel"><h2>Technician calibration activity</h2><p>Recorded calibration events, not a productivity or quality ranking.</p>{techRows.map((t,i)=><Meter key={t.id} label={t.name} value={t.items.length} total={events.length} color={colors[i%colors.length]}/>)}{!techRows.length&&<p>No calibration events yet.</p>}</article>
+ <article className="panel"><h2>Priority instruments</h2><p>Overdue and due soon, ordered by days to due.</p><div className="statusList">{priority.map(i=><div key={i.id}><Link href={"/workspace/instruments/"+i.id}>{i.tag_no}</Link><b>{i.days_to_due!==null&&i.days_to_due<0?Math.abs(i.days_to_due)+"d overdue":i.days_to_due+"d remaining"}</b></div>)}</div>{!priority.length&&<p>No urgent scheduled instruments.</p>}</article>
+ <article className="panel"><h2>Calibration workload</h2><p>Request status and recorded events.</p><div className="insightStatus"><div><strong>{requests.length}</strong><span>Total requests</span></div><div><strong>{requestDone}</strong><span>Completed</span></div><div><strong>{events.length}</strong><span>Calibration events</span></div></div><p>Request completion: {requests.length?Math.round(requestDone/requests.length*100):0}% of currently recorded requests. This is not a monthly schedule-adherence rate.</p></article>
+ </section>
+ {drill&&<section className="panel insightDrill" aria-live="polite"><div className="insightDrillHead"><h2>{drill.title} · {drillRows.length} instruments</h2><button type="button" onClick={()=>setDrill(null)}>Close ×</button></div><div className="tableWrap"><table><thead><tr><th>Tag</th><th>Name</th><th>Status</th><th>Days to due</th></tr></thead><tbody>{drillRows.map(i=><tr key={i.id}><td><Link href={"/workspace/instruments/"+i.id}>{i.tag_no}</Link></td><td>{i.name}</td><td>{i.calibration_status??"—"}</td><td>{i.days_to_due??"—"}</td></tr>)}</tbody></table></div></section>}
+ <p><small>Compliance = instruments with a recorded due date that has not passed ÷ active instruments. Upcoming windows are mutually exclusive. Maximum 2,000 instruments and 3,000 events/requests per query; totals may be incomplete above those limits. AI is not a validated failure-prediction model.</small></p>
  </>}</main>;
 }
