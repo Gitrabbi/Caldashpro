@@ -6,6 +6,7 @@ import {useEffect,useState} from "react";
 const liveItems=[
  ["Dashboard","/workspace"],
  ["Instruments","/workspace/instruments"],
+ ["QR Labels","/workspace/qr-labels"],
  ["AI Analytics","/workspace/analytics"],
  ["Calibration Schedule","/workspace/schedule"],
  ["Calibration Requests","/workspace/requests"],
