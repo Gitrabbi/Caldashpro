@@ -136,3 +136,24 @@ th,td{border-bottom:1px solid rgba(121,145,181,.16)}
 .aiResponse{white-space:pre-wrap;line-height:1.75;background:#081d2c;border:1px solid #3b647c;padding:20px;border-radius:12px;margin-top:18px;color:#dff6ff}
 .riskTrack{height:8px;background:#264457;border-radius:12px;overflow:hidden}.riskTrack div{height:100%;background:linear-gradient(90deg,#fb7185,#fbbf24)}
 @media(max-width:750px){.intelligenceTeaser{flex-direction:column;align-items:flex-start}.intelligenceTeaser .primary{white-space:normal}}
+
+
+/* Midnight glass contrast correction: override old light-theme !important declarations. */
+.shell{--glass:rgba(20,45,63,.94);--glass-border:#41647a;--glass-shadow:0 16px 36px #0005;--ink:#eef8ff;--muted:#b9cfde;--line:#41647a}
+.shell .content .cards article,.shell .content .panel{background:linear-gradient(140deg,#1c4055f2,#10293df5)!important;border:1px solid #41647a!important;color:#eef8ff!important;box-shadow:0 14px 36px #0005!important}
+.shell .content .cards span,.shell .content .panel p,.shell .content .panel small,.shell .content label,.shell .content .muted{color:#c0d5e3!important}
+.shell .content .cards strong,.shell .content .panel h2,.shell .content .panel h3,.shell .content h1{color:#f5fbff!important}
+.shell .content input:not([type="checkbox"]),.shell .content select,.shell .content textarea,.shell .content .toolbar input{background:#102d42!important;border:1px solid #56798d!important;color:#f3fbff!important}
+.shell .content input::placeholder,.shell .content textarea::placeholder{color:#b7cad7!important;opacity:1}
+.shell .content th{background:#254a60!important;color:#e0f8ff!important}
+.shell .content td{background:#142f43!important;color:#eef8ff!important}
+.shell .content tbody tr:hover td{background:#28516a!important}
+.shell .content th,.shell .content td{border-bottom:1px solid #496b80!important}
+.shell .content .notice{background:#274657!important;color:#ffe5b8!important;border-color:#658297!important}
+.shell .content .secondary{background:#254b63!important;color:#effaff!important;border-color:#658297!important}
+.shell .content .primary,.shell .content button:not(.secondary){background:#078ca5!important;color:#fff!important;border:1px solid #4eb8cb!important}
+.shell .content .tableWrap{max-width:100%;overflow-x:auto}
+.shell .workspaceSidebar select{background:#15354a!important;color:#f4fbff!important;border:1px solid #50748a!important}
+.shell .workspaceSidebar nav a.active{background:#1d5369!important;border-color:#397b92!important;box-shadow:inset 3px 0 #5de0ef!important}
+@media(max-width:900px){.shell{display:block!important;grid-template-columns:1fr!important}.shell>.content{width:100%!important;max-width:none!important;min-width:0!important;margin:0!important;padding:82px 16px 28px!important}.shell .workspaceSidebar{position:fixed!important;left:0!important;top:0!important;bottom:0!important;transform:translateX(-105%)!important;width:min(280px,84vw)!important;z-index:80!important}.shell .workspaceSidebar.isOpen{transform:translateX(0)!important}.shell .mobileMenu{display:grid!important;z-index:60!important}.shell .content .cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}.shell .content .grid{grid-template-columns:minmax(0,1fr)!important}}
+@supports not (backdrop-filter:blur(1px)){.shell .content .cards article,.shell .content .panel{background:#17354a!important}}
