@@ -113,3 +113,26 @@ th,td{border-bottom:1px solid rgba(121,145,181,.16)}
 @media(max-width:550px){.cards{gap:11px}.cards article{padding:15px;min-height:102px}.cards strong{font-size:25px}.panel{padding:17px}.content h1{font-size:28px}.content header{align-items:flex-start}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 @supports not (backdrop-filter:blur(1px)){.cards article,.panel,.login form{background:#fff!important}.workspaceSidebar{background:#102345!important}}
+
+
+/* Live workspace: dark glassmorphic industrial control center */
+.shell{--bg:#08131f;--ink:#e9f4ff;--muted:#9eb4c8;--line:#29475e;--blue:#089db8;--nav:#06101b;background:radial-gradient(ellipse at 78% 8%,#173d53 0%,#0b2032 38%,#07111d 75%);color:var(--ink)}
+.shell .workspaceSidebar{background:linear-gradient(180deg,#071525f5,#07101df5);border-right:1px solid #25445b;box-shadow:10px 0 40px #0003}
+.shell .content .panel,.shell .content .cards article{background:linear-gradient(135deg,#1b3c52bd,#102334dd);border:1px solid #36556a;border-radius:18px;box-shadow:0 12px 38px #0004;backdrop-filter:blur(18px)}
+.shell .content .panel h2,.shell .content h1,.shell .content .cards strong{color:#f2faff}
+.shell .content .eyebrow{color:#5ee5f0}
+.shell .content a:not(.primary){color:#8de4f4}
+.shell .content .primary,.shell .content button:not(.secondary){background:#0e9bb5;color:#fff;border-radius:10px}
+.shell .content input,.shell .content select,.shell .content textarea{background:#12293a;color:#eef8ff;border:1px solid #45647b;border-radius:9px}
+.shell .content input::placeholder{color:#a3b5c5}
+.shell .content table{color:#e9f4ff}
+.shell .content th{color:#9fdef0}
+.shell .content td,.shell .content th{border-color:#2b4d62}
+.shell .content .notice{color:#ffe1a6}
+.shell .content .cards{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+.intelligenceTeaser{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-top:24px;background:linear-gradient(110deg,#0c4a62cf,#152a40db)!important}
+.intelligenceTeaser p{max-width:680px;color:#b9d3e4}
+.intelligenceTeaser .primary{white-space:nowrap}
+.aiResponse{white-space:pre-wrap;line-height:1.75;background:#081d2c;border:1px solid #3b647c;padding:20px;border-radius:12px;margin-top:18px;color:#dff6ff}
+.riskTrack{height:8px;background:#264457;border-radius:12px;overflow:hidden}.riskTrack div{height:100%;background:linear-gradient(90deg,#fb7185,#fbbf24)}
+@media(max-width:750px){.intelligenceTeaser{flex-direction:column;align-items:flex-start}.intelligenceTeaser .primary{white-space:normal}}
