@@ -30,11 +30,13 @@ export default async function Dashboard(){
  const trends=months.map(m=>({label:m.label,approved:events.filter(x=>x.calibration_date?.startsWith(m.key)&&x.review_status==="approved").length,submitted:events.filter(x=>x.calibration_date?.startsWith(m.key)&&x.review_status!=="approved").length}));
  const max=Math.max(1,...trends.map(x=>x.approved+x.submitted));
  const upcoming=instruments.filter(x=>x.next_due_date&&x.days_to_due!==null&&x.days_to_due>=0).slice(0,8);
+ const failedEvents=events.filter(x=>x.result==="fail").length;
  const errors=[ir.error,er.error,rr.error,cr.error,pr.error].filter(Boolean);
  return <main className="content"><header><div><p className="eyebrow">CALIBRATION CONTROL CENTER</p><h1>Calibration Compliance Dashboard</h1><p>Live compliance, upcoming work, certificates and technician workload.</p></div><Link className="primary" href="/workspace/instruments">Instrument register</Link></header>
  {errors.length>0&&<p role="alert" className="notice">Some dashboard data could not be loaded: {errors.map(e=>e?.message).join("; ")}</p>}
+ <section className="panel intelligenceTeaser"><div><p className="eyebrow">INSTRUMENT INTELLIGENCE</p><h2>AI-assisted calibration analytics</h2><p>Explore overdue exposure, failure history and area-level risk. Generate model-backed insights from live records.</p></div><Link className="primary" href="/workspace/analytics">Open AI Analytics →</Link></section>
  <section className="cards">{[
- ["Calibration compliance",compliance+"%"],["Compliant instruments",compliant+" / "+total],["Overdue",overdue],["Due within 30 days",due30],["Due within 90 days",due90],["No due date",unscheduled],["Awaiting review",pending],["Approved calibrations",approved]
+ ["Calibration compliance",compliance+"%"],["Compliant instruments",compliant+" / "+total],["Overdue",overdue],["Due within 30 days",due30],["Due within 90 days",due90],["No due date",unscheduled],["Awaiting review",pending],["Approved calibrations",approved],["Recorded calibration failures",failedEvents]
  ].map(([label,value])=><article key={label}><div><span>{label}</span><strong>{value}</strong></div></article>)}</section>
  <p><small>Compliance = active instruments with a recorded next due date that has not passed ÷ all active instruments. Instruments without due dates count as noncompliant. Due-in-90-days includes due-in-30-days. Calibration totals reflect currently stored records, not a certified audit metric.</small></p>
  <section className="grid"><article className="panel"><h2>Calibration status</h2><div className="statusList">{["Valid","Expiring Soon","Critical","Overdue"].map(n=><div key={n}><span>{n}</span><b>{instruments.filter(i=>i.calibration_status===n).length}</b></div>)}<div><span>Unscheduled</span><b>{unscheduled}</b></div></div><p><Link href="/workspace/schedule">View calibration schedule →</Link></p></article>
