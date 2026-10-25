@@ -16,7 +16,7 @@ export default function QRLabels(){
  const [search,setSearch]=useState(""),[area,setArea]=useState(""),[location,setLocation]=useState(""),[status,setStatus]=useState("All"),[printFilter,setPrintFilter]=useState("All");
  const [selected,setSelected]=useState<string[]>([]),[printMode,setPrintMode]=useState(false);
  const [origin,setOrigin]=useState(""),[marking,setMarking]=useState(false);
- useEffect(()=>{setOrigin(window.location.origin)},[]);
+ useEffect(()=>{setOrigin(window.location.origin);const query=new URLSearchParams(window.location.search);setSearch(query.get("search")??"")},[]);
  useEffect(()=>{void(async()=>{
  const [i,a,l,q]=await Promise.all([
  db.from("instrument_calibration_status").select("id,tag_no,name,area_id,location_id,calibration_status,state").order("tag_no").limit(5000),
