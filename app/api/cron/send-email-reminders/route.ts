@@ -9,13 +9,13 @@ export async function GET(req:NextRequest){
  const key=process.env.SUPABASE_SERVICE_ROLE_KEY,api=process.env.RESEND_API_KEY,from=process.env.EMAIL_FROM;
  if(!key||!api||!from||!process.env.NEXT_PUBLIC_SUPABASE_URL)return NextResponse.json({error:"Email delivery environment is not configured"},{status:503});
  const db=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,key,{auth:{autoRefreshToken:false,persistSession:false}});
- const {data:notifications,error}=await db.from("notifications").select("id,recipient_id,title,message,created_at").order("created_at",{ascending:true}).limit(100);
+ const {data:notifications,error}=await db.from("notifications").select("id,recipient_id,title,message,created_at").order("created_at",{ascending:false}).limit(1000);
  if(error)return NextResponse.json({error:"Notification query failed"},{status:500});
- const candidates=(notifications??[]) as Notice[];
+ const candidates=((notifications??[]) as Notice[]).reverse();
  let sent=0,failed=0,skipped=0;
  for(const n of candidates){
   const {data:pref,error:prefError}=await db.from("notification_preferences").select("email_enabled").eq("user_id",n.recipient_id).maybeSingle();
-  if(prefError||pref?.email_enabled===false){skipped++;continue}
+  if(prefError||pref?.email_enabled!==true){skipped++;continue}
   const {data:previous}=await db.from("notification_email_deliveries").select("status").eq("notification_id",n.id).maybeSingle();
   if(previous){skipped++;continue}
   const {data:claim,error:claimError}=await db.from("notification_email_deliveries").insert({notification_id:n.id,recipient_id:n.recipient_id,status:"pending"}).select("notification_id").maybeSingle();
