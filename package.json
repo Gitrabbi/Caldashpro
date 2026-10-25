@@ -16,7 +16,8 @@
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "exceljs": "4.4.0",
-    "jspdf": "3.0.3"
+    "jspdf": "3.0.3",
+    "recharts": "^2.15.4"
   },
   "devDependencies": {
     "@types/node": "22.18.6",
