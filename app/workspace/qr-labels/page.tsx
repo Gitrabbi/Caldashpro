@@ -33,7 +33,7 @@ export default function QRLabels(){
  const chosen=filtered.filter(i=>selected.includes(i.id));
  const printable=chosen.length?chosen:filtered;
  const missing=instruments.filter(i=>!labelMap.get(i.id)?.printed_at).length;
- const url=(id:string)=>origin+"/workspace/instruments/"+encodeURIComponent(id);
+ const url=(id:string)=>origin+"/i/"+encodeURIComponent(id);
  function printLabels(){if(!printable.length)return;setPrintMode(true);setNotice("Print preview ready. Use your browser Print option and choose Save as PDF or a printer.");setTimeout(()=>window.print(),350)}
  async function markPrinted(){if(!printable.length||marking)return;const ids=printable.map(x=>x.id);if(!window.confirm("Confirm that "+ids.length+" labels were actually printed or saved for printing?"))return;setMarking(true);const {error:err}=await db.rpc("mark_instrument_qr_printed",{p_instrument_ids:ids});if(err){setNotice(err.message)}else{const q=await db.from("instrument_qr_labels").select("instrument_id,printed_at,print_count").limit(5000);if(q.data)setLabels(q.data);setNotice("Print status recorded for "+ids.length+" instruments.")}setMarking(false)}
  return <main className="content qrManager">
