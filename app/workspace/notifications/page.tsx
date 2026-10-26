@@ -1,4 +1,5 @@
 import NotificationInbox from "./NotificationInbox";
+import TestEmailButton from "./TestEmailButton";
 import NotificationList, {type Alert} from "./NotificationList";
 import Link from "next/link";
 import {createClient} from "@/lib/supabase/server";
@@ -19,6 +20,6 @@ export default async function Notifications(){
  {(i.error||c.error)&&<div className="notice" role="alert">{i.error?.message??c.error?.message}</div>}
  <NotificationInbox/>
  <NotificationList alerts={alerts as Alert[]}/>
- <section className="panel" style={{marginTop:20}}><h2>Notification delivery</h2><p>Email, Telegram and scheduled reminders are not enabled yet. This page does not send alerts automatically.</p></section>
+ <section className="panel" style={{marginTop:20}}><h2>Notification delivery</h2><p>In-app reminders are available. Email reminders require Gmail SMTP configuration and a deployed scheduler; Telegram delivery is not enabled.</p><TestEmailButton/></section>
  </main>;
 }
