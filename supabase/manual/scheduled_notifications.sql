@@ -41,7 +41,7 @@ BEGIN
    ON CONFLICT DO NOTHING;
    IF FOUND THEN
      INSERT INTO public.notifications(recipient_id,type,title,message,entity_type,entity_id)
-     VALUES(person.id,level,CASE WHEN item.kind='instrument' THEN 'Calibration deadline' ELSE 'Certificate expiry' END,
+     VALUES(person.id,level::public.notification_type,CASE WHEN item.kind='instrument' THEN 'Calibration deadline' ELSE 'Certificate expiry' END,
       COALESCE(item.label,'Unnumbered certificate')||' — '||item.deadline::text||' ('||level||')',item.kind,item.entity_id);
      n:=n+1;
    END IF;
