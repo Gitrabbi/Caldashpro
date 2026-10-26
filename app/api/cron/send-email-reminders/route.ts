@@ -4,7 +4,7 @@ import {createClient} from "@supabase/supabase-js";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 
-function smtpSend({user,password,to,subject,body}:{user:string;password:string;to:string;subject:string;body:string}):Promise<void>{
+export function smtpSend({user,password,to,subject,body}:{user:string;password:string;to:string;subject:string;body:string}):Promise<void>{
  return new Promise((resolve,reject)=>{
   const socket=tls.connect({host:"smtp.gmail.com",port:465,servername:"smtp.gmail.com",rejectUnauthorized:true});
   socket.setTimeout(20000);
