@@ -1,5 +1,6 @@
 import NotificationInbox from "./NotificationInbox";
 import TestEmailButton from "./TestEmailButton";
+import DeliveryMonitor from "./DeliveryMonitor";
 import NotificationList, {type Alert} from "./NotificationList";
 import Link from "next/link";
 import {createClient} from "@/lib/supabase/server";
@@ -21,5 +22,6 @@ export default async function Notifications(){
  <NotificationInbox/>
  <NotificationList alerts={alerts as Alert[]}/>
  <section className="panel" style={{marginTop:20}}><h2>Notification delivery</h2><p>In-app reminders are available. Email reminders require Gmail SMTP configuration and a deployed scheduler; Telegram delivery is not enabled.</p><TestEmailButton/></section>
+ <DeliveryMonitor/>
  </main>;
 }
