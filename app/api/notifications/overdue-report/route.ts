@@ -1,5 +1,5 @@
 import {NextResponse} from "next/server";
-import {createClient as serviceClient} from "@supabase/supabase-js";
+import {createClient as serviceClient, type SupabaseClient} from "@supabase/supabase-js";
 import {createClient as sessionClient} from "@/lib/supabase/server";
 import {smtpSend} from "@/app/api/cron/send-email-reminders/route";
 export const runtime="nodejs";
@@ -15,13 +15,16 @@ async function context(){
  if(!url||!key)return null;
  return {user,db:serviceClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}})};
 }
-async function overdue(db:ReturnType<typeof serviceClient>){
+async function overdue(db:SupabaseClient<any, "public", "public", any, any>){
  const today=new Date().toISOString().slice(0,10);
  const all:{tag_no:string;name:string;next_due_date:string}[]=[];
  for(let from=0;from<10000;from+=500){
   const {data,error}=await db.from("instrument_calibration_status").select("tag_no,name,next_due_date,state").eq("state","active").lt("next_due_date",today).order("next_due_date",{ascending:true}).range(from,from+499);
   if(error)throw Error("Could not load overdue instruments");
-  all.push(...(data??[]).filter(x=>x.next_due_date).map(x=>({tag_no:x.tag_no??"",name:x.name??"",next_due_date:x.next_due_date})));
+  const records = (data ?? []) as {tag_no:string|null;name:string|null;next_due_date:string|null}[];
+  for (const record of records) {
+   if (record.next_due_date) all.push({tag_no:record.tag_no??"",name:record.name??"",next_due_date:record.next_due_date});
+  }
   if((data??[]).length<500)break;
  }
  return all;
