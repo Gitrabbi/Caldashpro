@@ -4,7 +4,7 @@ import {createClient} from "@supabase/supabase-js";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 
-export function smtpSend({user,password,to,subject,body}:{user:string;password:string;to:string;subject:string;body:string}):Promise<void>{
+export function smtpSend({user,password,to,subject,body,attachment}:{user:string;password:string;to:string;subject:string;body:string;attachment?:{filename:string;content:Buffer;contentType:string}}):Promise<void>{
  return new Promise((resolve,reject)=>{
   const socket=tls.connect({host:"smtp.gmail.com",port:465,servername:"smtp.gmail.com",rejectUnauthorized:true});
   socket.setTimeout(20000);
@@ -38,7 +38,17 @@ export function smtpSend({user,password,to,subject,body}:{user:string;password:s
    await command("RCPT TO:<"+clean(to)+">",[250,251]);
    await command("DATA",[354]);
    const encodedSubject="=?UTF-8?B?"+Buffer.from(subject).toString("base64")+"?=";
-   const message=["From: "+clean(user),"To: "+clean(to),"Subject: "+encodedSubject,"MIME-Version: 1.0","Content-Type: text/plain; charset=UTF-8","Content-Transfer-Encoding: base64","",""+Buffer.from(body).toString("base64").match(/.{1,76}/g)?.join("\r\n")].join("\r\n");
+   const baseHeaders=["From: "+clean(user),"To: "+clean(to),"Subject: "+encodedSubject,"MIME-Version: 1.0"];
+   const encodedBody=Buffer.from(body).toString("base64").match(/.{1,76}/g)?.join("\r\n")??"";
+   let message:string;
+   if(attachment){
+    const boundary="caldashpro_"+Date.now().toString(36);
+    const filename=attachment.filename.replace(/[^a-zA-Z0-9._-]/g,"_");
+    const encodedFile=attachment.content.toString("base64").match(/.{1,76}/g)?.join("\r\n")??"";
+    message=[...baseHeaders,'Content-Type: multipart/mixed; boundary="'+boundary+'"',"","--"+boundary,"Content-Type: text/plain; charset=UTF-8","Content-Transfer-Encoding: base64","",encodedBody,"--"+boundary,"Content-Type: "+attachment.contentType+'; name="'+filename+'"','Content-Disposition: attachment; filename="'+filename+'"',"Content-Transfer-Encoding: base64","",encodedFile,"--"+boundary+"--"].join("\r\n");
+   }else{
+    message=[...baseHeaders,"Content-Type: text/plain; charset=UTF-8","Content-Transfer-Encoding: base64","",encodedBody].join("\r\n");
+   }
    await command(message+"\r\n.",[250]);
    await command("QUIT",[221]);socket.end();resolve();
   })().catch(fail);
