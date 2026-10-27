@@ -1,8 +1,5 @@
-import NotificationInbox from "./NotificationInbox";
-import TestEmailButton from "./TestEmailButton";
-import DeliveryMonitor from "./DeliveryMonitor";
-import OverdueReport from "./OverdueReport";
-import NotificationList, {type Alert} from "./NotificationList";
+import NotificationSections from "./NotificationSections";
+import {type Alert} from "./NotificationList";
 import Link from "next/link";
 import {createClient} from "@/lib/supabase/server";
 export const dynamic="force-dynamic";
@@ -20,10 +17,6 @@ export default async function Notifications(){
  
  return <main className="content"><header><div><p className="eyebrow">ACTION CENTER</p><h1>Notifications</h1><p>Live calibration and certificate deadline alerts.</p></div><Link href="/workspace/schedule">Calibration schedule →</Link></header>
  {(i.error||c.error)&&<div className="notice" role="alert">{i.error?.message??c.error?.message}</div>}
- <NotificationInbox/>
- <NotificationList alerts={alerts as Alert[]}/>
- <section className="panel" style={{marginTop:20}}><h2>Notification delivery</h2><p>In-app reminders are available. Email reminders require Gmail SMTP configuration and a deployed scheduler; Telegram delivery is not enabled.</p><TestEmailButton/></section>
- <OverdueReport/>
- <DeliveryMonitor/>
+ <NotificationSections alerts={alerts as Alert[]}/>
  </main>;
 }
