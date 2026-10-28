@@ -3,7 +3,7 @@ import {createClient} from "@/lib/supabase/server";
 export const dynamic="force-dynamic";
 type Instrument={id:string;tag_no:string;name:string;next_due_date:string|null;calibration_status:string|null;days_to_due:number|null};
 type Event={id:string;calibration_date:string;review_status:string;technician_id:string|null;result:string};
-type Request={id:string;status:string;assigned_to:string|null};
+type Request={id:string;status:string;assigned_to:string|null;due_date:string|null};
 type Cert={id:string;expiry_date:string|null};
 const months=Array.from({length:6},(_,i)=>{const d=new Date();d.setUTCDate(1);d.setUTCMonth(d.getUTCMonth()-(5-i));return {key:d.toISOString().slice(0,7),label:d.toLocaleString("en-GB",{month:"short",year:"2-digit",timeZone:"UTC"})}});
 export default async function Dashboard(){
@@ -11,7 +11,7 @@ export default async function Dashboard(){
  const [ir,er,rr,cr,pr]=await Promise.all([
  s.from("instrument_calibration_status").select("id,tag_no,name,next_due_date,calibration_status,days_to_due").eq("state","active").order("next_due_date",{ascending:true,nullsFirst:false}),
  s.from("calibration_events").select("id,calibration_date,review_status,technician_id,result"),
- s.from("calibration_requests").select("id,status,assigned_to"),
+ s.from("calibration_requests").select("id,status,assigned_to,due_date"),
  s.from("certificates").select("id,expiry_date"),
  s.from("profiles").select("id,full_name").eq("active",true)
  ]);
@@ -31,9 +31,13 @@ export default async function Dashboard(){
  const max=Math.max(1,...trends.map(x=>x.approved+x.submitted));
  const upcoming=instruments.filter(x=>x.next_due_date&&x.days_to_due!==null&&x.days_to_due>=0).slice(0,8);
  const failedEvents=events.filter(x=>x.result==="fail").length;
+ const openWork=requests.filter(r=>r.status!=="completed"&&r.status!=="cancelled");
+ const lateWork=openWork.filter(r=>r.due_date&&r.due_date<today);
+ const unassignedWork=openWork.filter(r=>!r.assigned_to);
  const errors=[ir.error,er.error,rr.error,cr.error,pr.error].filter(Boolean);
  return <main className="content"><header><div><p className="eyebrow">CALIBRATION CONTROL CENTER</p><h1>Calibration Compliance Dashboard</h1><p>Live compliance, upcoming work, certificates and technician workload.</p></div><Link className="primary" href="/workspace/instruments">Instrument register</Link></header>
  {errors.length>0&&<p role="alert" className="notice">Some dashboard data could not be loaded: {errors.map(e=>e?.message).join("; ")}</p>}
+ <section className="cards" style={{marginBottom:18}}>{[["Open work orders",openWork.length],["Overdue work orders",lateWork.length],["Unassigned work orders",unassignedWork.length]].map(([label,value])=><article key={label}><div><span>{label}</span><strong>{value}</strong></div></article>)}</section><p><Link href="/workspace/requests">Manage work orders →</Link></p>
  <section className="panel intelligenceTeaser"><div><p className="eyebrow">INSTRUMENT INTELLIGENCE</p><h2>AI-assisted calibration analytics</h2><p>Explore overdue exposure, failure history and area-level risk. Generate model-backed insights from live records.</p></div><Link className="primary" href="/workspace/analytics">Open AI Analytics →</Link></section>
  <section className="cards">{[
  ["Calibration compliance",compliance+"%"],["Compliant instruments",compliant+" / "+total],["Overdue",overdue],["Due within 30 days",due30],["Due within 90 days",due90],["No due date",unscheduled],["Awaiting review",pending],["Approved calibrations",approved],["Recorded calibration failures",failedEvents]
