@@ -13,11 +13,11 @@ export default function Signup() {
     e.preventDefault();
     setMessage("Creating account...");
     const { data,error }=await createClient().auth.signUp({
-      email,password,options:{data:{full_name:name},emailRedirectTo:`${window.location.origin}/auth/confirm`}
+      email,password,options:{data:{full_name:name},emailRedirectTo:"https://caldashpro.rabbiwest.workers.dev/auth/confirm"}
     });
     if(error){setMessage(error.message);return;}
-    if(data.session){location.href="/workspace";return;}
-    setMessage("Account created. Check your email to confirm your address, then sign in.");
+    if(data.session){location.href="/complete-registration";return;}
+    setMessage("Check your email for the CalDashPro activation link. Your application profile is created after verification and registration completion.");
   }
 
   return <main className="login"><form onSubmit={submit}>
