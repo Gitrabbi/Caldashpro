@@ -1,0 +1,1 @@
+export default function UsersPage(){return <main className="content"><h1>User Management</h1><p>Manage technician profiles and assignments.</p></main>;}
