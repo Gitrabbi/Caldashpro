@@ -22,8 +22,9 @@ export default function UserDirectory({currentUserId}:{currentUserId:string}){
  async function save(p:Member){
   if(p.id===currentUserId&&(!p.active||p.role!=="admin")){setMessage("You cannot deactivate or demote your own administrator account.");return;}
   setSaving(p.id);setMessage("");
-  const {error}=await db.from("profiles").update({full_name:p.full_name.trim(),role:p.role,active:p.active}).eq("id",p.id);
-  setSaving("");setMessage(error?error.message:"Profile updated.");
+  const response=await fetch("/api/admin/user-profile",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});
+  const result=await response.json().catch(()=>({error:"Unable to save changes"}));
+  setSaving("");setMessage(response.ok?"Profile updated.":result.error??"Unable to save changes.");
   await load();
  }
  return <>
