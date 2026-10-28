@@ -58,7 +58,10 @@ export function smtpSend({user,password,to,subject,body,attachment}:{user:string
 
 type Notice={id:string;recipient_id:string;title:string;message:string;created_at:string;entity_type:string|null;entity_id:string|null;type:string};
 type Details={tag:string;name:string;area:string;group:string;location:string;due:string};
-type DB=ReturnType<typeof createClient>;
+type DB=ReturnType<typeof createClient<any,"public">>;
+type WorkOrderRef={id:string;instrument_id:string|null;due_date:string|null};
+type CertificateRef={id:string;instrument_id:string|null;expiry_date:string|null};
+type InstrumentRef={id:string;tag_no:string|null;name:string|null;next_due_date:string|null;area_id:string|null;instrument_group_id:string|null;location_id:string|null};
 async function lookup(db:DB,notices:Notice[]){
  const instrumentIds=[...new Set(notices.filter(n=>n.entity_type==="instrument"&&n.entity_id).map(n=>n.entity_id!))];
  const requestIds=[...new Set(notices.filter(n=>n.entity_type==="calibration_request"&&n.entity_id).map(n=>n.entity_id!))];
@@ -68,15 +71,15 @@ async function lookup(db:DB,notices:Notice[]){
   certificateIds.length?db.from("certificates").select("id,instrument_id,expiry_date").in("id",certificateIds):Promise.resolve({data:[],error:null})
  ]);
  if(requests.error||certificates.error)throw Error("Failed to load report references");
- const reqMap=new Map((requests.data??[]).map(x=>[x.id,x]));
- const certMap=new Map((certificates.data??[]).map(x=>[x.id,x]));
+ const reqMap=new Map<string,WorkOrderRef>(((requests.data??[]) as WorkOrderRef[]).map(x=>[x.id,x]));
+ const certMap=new Map<string,CertificateRef>(((certificates.data??[]) as CertificateRef[]).map(x=>[x.id,x]));
  const allIds=[...new Set([...instrumentIds,...(requests.data??[]).map(x=>x.instrument_id),...(certificates.data??[]).map(x=>x.instrument_id)].filter((x):x is string=>!!x))];
  const [instruments,areas,groups,locations]=await Promise.all([
   allIds.length?db.from("instrument_calibration_status").select("id,tag_no,name,next_due_date,area_id,instrument_group_id,location_id").in("id",allIds):Promise.resolve({data:[],error:null}),
   db.from("areas").select("id,name"),db.from("instrument_groups").select("id,name"),db.from("locations").select("id,name")
  ]);
  if(instruments.error||areas.error||groups.error||locations.error)throw Error("Failed to load instrument metadata");
- const im=new Map((instruments.data??[]).map(x=>[x.id,x]));
+ const im=new Map<string,InstrumentRef>(((instruments.data??[]) as InstrumentRef[]).map(x=>[x.id,x]));
  const am=new Map((areas.data??[]).map(x=>[x.id,x.name]));
  const gm=new Map((groups.data??[]).map(x=>[x.id,x.name]));
  const lm=new Map((locations.data??[]).map(x=>[x.id,x.name]));
