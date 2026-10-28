@@ -19,6 +19,7 @@ const liveItems=[
  ["Notifications","/workspace/notifications"],
  ["Reports","/workspace/reports"],
  ["Settings","/workspace/settings"],
+ ["User Management","/workspace/users"],
 ] as const;
 export default function WorkspaceNav({name,role}:{name:string;role:string}){
  const [open,setOpen]=useState(false);
