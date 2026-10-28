@@ -1,0 +1,16 @@
+"use client";
+import {ResponsiveContainer,PieChart,Pie,Cell,Tooltip,Legend,BarChart,Bar,XAxis,YAxis,CartesianGrid,LineChart,Line} from "recharts";
+type Trend={label:string;approved:number;submitted:number};
+type Group={name:string;compliant:number;overdue:number;unscheduled:number};
+const palette=["#10b981","#f59e0b","#ef4444","#64748b"];
+const card:React.CSSProperties={background:"#fff",border:"1px solid #e2e8f0",borderRadius:18,padding:20,boxShadow:"0 8px 24px #0f172a0a",minWidth:0};
+export default function ComplianceCharts({status,trends,areas,groups}:{status:{name:string;value:number}[];trends:Trend[];areas:Group[];groups:Group[]}){
+ const active=status.filter(x=>x.value>0);
+ const hasTrends=trends.some(x=>x.approved+x.submitted>0);
+ const chartGroups=(rows:Group[])=>rows.slice(0,10);
+ return <section style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,360px),1fr))",gap:18,margin:"20px 0"}}>
+  <article style={card}><h2 style={{marginTop:0}}>Calibration health</h2><p style={{color:"#64748b"}}>Current active instrument distribution</p>{active.length?<div style={{height:280}}><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={active} dataKey="value" nameKey="name" innerRadius={66} outerRadius={100} paddingAngle={3}>{active.map((x,i)=><Cell key={x.name} fill={palette[i%palette.length]}/>)}</Pie><Tooltip/><Legend/></PieChart></ResponsiveContainer></div>:<p>No instruments recorded.</p>}</article>
+  <article style={card}><h2 style={{marginTop:0}}>Calibration activity trend</h2><p style={{color:"#64748b"}}>Approved versus other calibration records · six months</p>{hasTrends?<div style={{height:280}}><ResponsiveContainer width="100%" height="100%"><LineChart data={trends} margin={{top:10,right:12,left:-25,bottom:5}}><CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0"/><XAxis dataKey="label"/><YAxis allowDecimals={false}/><Tooltip/><Legend/><Line type="monotone" dataKey="approved" name="Approved" stroke="#10b981" strokeWidth={3} dot={{r:4}}/><Line type="monotone" dataKey="submitted" name="Other" stroke="#f59e0b" strokeWidth={3} dot={{r:4}}/></LineChart></ResponsiveContainer></div>:<p>No calibration activity in this period.</p>}</article>
+  {[{title:"Compliance by plant area",rows:areas},{title:"Compliance by instrument group",rows:groups}].map(({title,rows})=><article key={title} style={card}><h2 style={{marginTop:0}}>{title}</h2><p style={{color:"#64748b"}}>Active instruments · up to 10 largest categories</p>{rows.length?<div style={{height:Math.max(240,chartGroups(rows).length*43+70)}}><ResponsiveContainer width="100%" height="100%"><BarChart data={chartGroups(rows)} layout="vertical" margin={{top:5,right:12,left:10,bottom:5}}><CartesianGrid strokeDasharray="3 3" horizontal={false}/><XAxis type="number" allowDecimals={false}/><YAxis type="category" dataKey="name" width={105} tick={{fontSize:11}}/><Tooltip/><Legend/><Bar dataKey="compliant" stackId="total" fill="#10b981" name="Compliant"/><Bar dataKey="overdue" stackId="total" fill="#ef4444" name="Overdue"/><Bar dataKey="unscheduled" stackId="total" fill="#94a3b8" name="No due date"/></BarChart></ResponsiveContainer></div>:<p>No category data available.</p>}</article>)}
+ </section>;
+}
