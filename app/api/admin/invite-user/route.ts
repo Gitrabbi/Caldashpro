@@ -17,7 +17,7 @@ export async function POST(request:NextRequest){
  const key=process.env.SUPABASE_SERVICE_ROLE_KEY;
  if(!url||!key)return NextResponse.json({error:"User invitation service is not configured"},{status:503});
  const admin=createAdminClient(url,key,{auth:{autoRefreshToken:false,persistSession:false}});
- const {data,error}=await admin.auth.admin.inviteUserByEmail(email,{data:{full_name:fullName},redirectTo:"https://caldashpro.rabbiwest.workers.dev/auth/confirm?next=/complete-registration"});
+ const {data,error}=await admin.auth.admin.inviteUserByEmail(email,{data:{full_name:fullName},redirectTo:"https://caldashpro.vercel.app/auth/confirm?next=/complete-registration"});
  if(error)return NextResponse.json({error:error.message},{status:400});
  if(!data.user?.id)return NextResponse.json({error:"Invitation did not return a user ID"},{status:502});
  const {error:metadataError}=await admin.auth.admin.updateUserById(data.user.id,{app_metadata:{...data.user.app_metadata,caldashpro_invited:true,caldashpro_role:role}});
