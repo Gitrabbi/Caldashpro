@@ -13,7 +13,7 @@ export default function Signup() {
     e.preventDefault();
     setMessage("Creating account...");
     const { data,error }=await createClient().auth.signUp({
-      email,password,options:{data:{full_name:name},emailRedirectTo:"https://caldashpro.rabbiwest.workers.dev/auth/confirm"}
+      email,password,options:{data:{full_name:name},emailRedirectTo:"https://caldashpro.vercel.app/auth/confirm"}
     });
     if(error){setMessage(error.message);return;}
     if(data.session){location.href="/complete-registration";return;}
