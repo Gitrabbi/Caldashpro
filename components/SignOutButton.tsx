@@ -1,0 +1,4 @@
+"use client";
+import {useState} from "react";
+import {createClient} from "@/lib/supabase/client";
+export default function SignOutButton({label="Sign out"}:{label?:string}){const[busy,setBusy]=useState(false),[error,setError]=useState("");async function signOut(){setBusy(true);setError("");try{const{error}=await createClient().auth.signOut({scope:"local"});if(error)throw error;window.location.replace("/login");}catch{setError("Unable to sign out. Please retry.");setBusy(false);}}return <div><button type="button" disabled={busy} onClick={signOut} style={{padding:"8px 12px",borderRadius:8,cursor:"pointer"}}>{busy?"Signing out…":label}</button>{error&&<p role="alert">{error}</p>}</div>}
