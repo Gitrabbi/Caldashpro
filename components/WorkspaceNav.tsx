@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import SignOutButton from "@/components/SignOutButton";
 import {usePathname,useRouter} from "next/navigation";
 import {useEffect,useState} from "react";
 
@@ -21,7 +22,7 @@ const liveItems=[
  ["Settings","/workspace/settings"],
  ["User Management","/workspace/users"],
 ] as const;
-export default function WorkspaceNav({name,role}:{name:string;role:string}){
+export default function WorkspaceNav({name,role,email}:{name:string;role:string;email?:string}){
  const [open,setOpen]=useState(false);
  const path=usePathname(),router=useRouter();
  const demo=path.startsWith("/workspace/demo");
@@ -45,7 +46,7 @@ export default function WorkspaceNav({name,role}:{name:string;role:string}){
   <nav>{demo?
    <Link href="/workspace/demo" className="active"><span className="dot"/>Demo Dashboard</Link>
    :liveItems.map(([label,href])=><Link href={href} key={href} className={path===href?"active":""}><span className="dot"/>{label}</Link>)}</nav>
-  <div className="usercard"><b>{name}</b><span>{role}</span></div>
+  <div className="usercard"><b>{name}</b><span>{email}</span><span>{role}</span><SignOutButton/></div>
  </aside>
  </>;
 }
