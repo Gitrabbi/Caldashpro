@@ -24,7 +24,7 @@ export default function Signup() {
     <div className="brandmark">C</div>
     <p className="eyebrow">CALDASHPRO</p>
     <h1>Create account</h1>
-    <p>New accounts begin with Viewer access until an administrator assigns a role.</p>
+    <p>New accounts require email verification and administrator approval before workspace access. If you received an invitation, use its acceptance link instead.</p>
     <label>Full name<input required value={name} onChange={e=>setName(e.target.value)}/></label>
     <label>Email<input type="email" required value={email} onChange={e=>setEmail(e.target.value)}/></label>
     <label>Password<input type="password" minLength={8} required value={password} onChange={e=>setPassword(e.target.value)}/></label>
