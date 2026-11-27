@@ -44,7 +44,7 @@ export default function WorkspaceNav({name,role,email,guest=false}:{name:string;
    </select>
    <small style={{display:"block",marginTop:6}}>{demo?"Practice records only — separate demo tables":"Production calibration records"}</small>
   </div>}
-  <nav>{guest?<>{[["Dashboard","/guest"],["Instruments","/guest/instruments"],["QR Verification","/guest/qr"]].map(([label,href])=><Link key={href} href={href} className={path===href?"active":""}><span className="dot"/>{label}</Link>)}<Link href="/">Exit guest mode</Link></>:demo?
+  <nav>{guest?<>{[["Dashboard","/guest"],["Instruments","/guest/instruments"],["Calibration Schedule","/guest/schedule"],["Certificate Expiry","/guest/certificate-expiry"],["QR Verification","/guest/qr"]].map(([label,href])=><Link key={href} href={href} className={path===href?"active":""}><span className="dot"/>{label}</Link>)}<Link href="/">Exit guest mode</Link></>:demo?
    <Link href="/workspace/demo" className="active"><span className="dot"/>Demo Dashboard</Link>
    :liveItems.map(([label,href])=><Link href={href} key={href} className={path===href?"active":""}><span className="dot"/>{label}</Link>)}</nav>
   <div className="usercard"><b>{name}</b><span>{email}</span><span>{role}</span></div>
