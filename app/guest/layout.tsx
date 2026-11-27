@@ -1,0 +1,1 @@
+import WorkspaceNav from "@/components/WorkspaceNav";export default function GuestLayout({children}:{children:React.ReactNode}){return <div className="shell"><WorkspaceNav name="Guest visitor" role="Read only" guest/>{children}</div>}
