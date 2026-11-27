@@ -1,0 +1,4 @@
+import {NextResponse} from "next/server";
+import {createClient} from "@supabase/supabase-js";
+export const dynamic="force-dynamic";
+export async function GET(){try{const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!url||!key)throw Error();const db=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});const rows=[];for(let offset=0;;offset+=500){const {data,error}=await db.from("instrument_calibration_status").select("id,tag_no,name,manufacturer,model,state,calibration_status,last_calibration_date,next_due_date,calibration_interval_months").order("id").range(offset,offset+499);if(error)throw error;rows.push(...(data??[]));if(!data||data.length<500)break;}return NextResponse.json(rows,{headers:{"Cache-Control":"no-store"}});}catch{return NextResponse.json({error:"Register unavailable."},{status:503});}}
