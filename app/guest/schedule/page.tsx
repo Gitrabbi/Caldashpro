@@ -1,0 +1,1 @@
+import GuestRegister from "@/components/GuestRegister";export default function Page(){return <GuestRegister mode="schedule"/>}
